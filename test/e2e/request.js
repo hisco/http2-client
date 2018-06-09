@@ -55,13 +55,7 @@ const onHTTP2ServerReady = new Promise((resolve , reject)=>{
         serverCloseActions.push(http2Debug.stopServer.bind(http2Debug));
     });
 })
-// process.on('unhandledRejection', (reason, p) => {
-//     console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-//     // application specific logging, throwing an error, or other logic here
-//   });
-//   process.on('uncaughtException', err => {
-//     console.error(err, 'Uncaught Exception thrown');
-//   });
+
 describe('request' , ()=>{
     before(()=>{
         return Promise.all([
@@ -131,22 +125,6 @@ describe('request' , ()=>{
         });
     })
     describe('http2' , ()=>{
-        it('Should be able to make request with request options string' , ()=>{
-            return new Promise((resolve , reject)=>{
-                const req = request('https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty' , (res)=>{
-                    req
-                getBody(res)
-                    .then((bodyRaw)=>{
-                        // const json = JSON.parse(bodyRaw);
-                        resolve()
-                    })
-                    .catch((err)=>{
-                        reject(err)
-                    })
-                });
-                req.end();
-            })
-        });
         it('Should be able to make request with request options' , ()=>{
             return new Promise((resolve , reject)=>{
                 const req = request({
