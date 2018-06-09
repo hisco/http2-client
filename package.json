@@ -1,0 +1,36 @@
+{
+  "name": "http2-client",
+  "version": "0.0.8",
+  "description": "An http2 and http1 client compatible, it's using the ALPN protocol",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha --recursive --reporter spec",
+    "watch-test": "mocha --recursive --watch --reporter spec",
+    "test-ci": "istanbul cover ./node_modules/mocha/bin/_mocha test/**/*.js --report lcovonly -- -R spec && cat ./coverage/lcov.info"
+  },
+  "devDependencies": {
+    "mocha": "^5.1.1",
+    "chai": "^4.1.2",
+    "chai-spies": "^1.0.0",
+    "istanbul": "0.4.5",
+    "http2-debug": "1.0.1"
+  },
+  "keywords": [
+    "http2",
+    "http2 client",
+    "request",
+    "compatible",
+    "client",
+    "compatibility"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hisco/http2-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hisco/http2-client/issues"
+  },
+  "homepage": "https://github.com/hisco",
+  "author": "Eyald <hisco@googlegroups.com‬>",
+  "license": "MIT"
+}
