@@ -36,7 +36,7 @@ req2.end();
 
 ## How?
 `http2-client` implements 'Application-Layer Protocol Negotiation (ALPN)'.
-Which means it first creates TCP connection, after succeful ALPN negotiation the supported protocol is known.
+Which means it first creates TCP connection, after successful ALPN negotiation the supported protocol is known.
 
 If the supported protocol is http2.0 `http2-client` will re-use the same connection.
 After the http2.0 connection won't be used for `keepH2ConnectionFor` which defaults to 100 ms, it will be automatically.
