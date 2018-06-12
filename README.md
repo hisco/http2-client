@@ -76,50 +76,50 @@ req.end();
 ``` 
 
 ### Http/1.1 - request(options[, callback])
- * options <Object> | <string> | <URL>
-    * protocol <string> Protocol to use. Default: 'http:'.
-    * host <string> A domain name or IP address of the server to issue the request to. Default:  'localhost'.
-    * hostname <string> Alias for host. To support url.parse(), hostname is preferred over host.
-    * family <number> IP address family to use when resolving host and hostname. Valid values are 4 or 6.When unspecified, both IP v4 and v6 will be used.
-    * port <number> Port of remote server. Default: 80.
-    * localAddress <string> Local interface to bind for network connections.
-    * socketPath <string> Unix Domain Socket (use one of host:port or socketPath).
-    * method <string> A string specifying the HTTP request method. Default: 'GET'.
-    * path <string> Request path. Should include query string if any. E.G. '/index.html?page=12'. An exception is thrown when the request path contains illegal characters. Currently, only spaces are rejected but that may change in the future. Default: '/'.
+ * options `<Object> | <string> | <URL>`
+    * protocol `<string>` Protocol to use. Default: 'http:'.
+    * host `<string>` A domain name or IP address of the server to issue the request to. Default:  'localhost'.
+    * hostname `<string>` Alias for host. To support url.parse(), hostname is preferred over host.
+    * family `<number>` IP address family to use when resolving host and hostname. Valid values are 4 or 6.When unspecified, both IP v4 and v6 will be used.
+    * port `<number>` Port of remote server. Default: 80.
+    * localAddress `<string>` Local interface to bind for network connections.
+    * socketPath `<string>` Unix Domain Socket (use one of host:port or socketPath).
+    * method `<string>` A string specifying the HTTP request method. Default: 'GET'.
+    * path `<string>` Request path. Should include query string if any. E.G. '/index.html?page=12'. An exception is thrown when the request path contains illegal characters. Currently, only spaces are rejected but that may change in the future. Default: '/'.
     * headers <Object> An object containing request headers.
-    * auth <string> Basic authentication i.e. 'user:password' to compute an Authorization header.
-    * agent <http.Agent> | <boolean> Controls Agent behavior. Possible values:
+    * auth `<string>` Basic authentication i.e. 'user:password' to compute an Authorization header.
+    * agent `<http.Agent> | <boolean>` Controls Agent behavior. Possible values:
        * undefined (default): use http.globalAgent for this host and port.
        * Agent object: explicitly use the passed in Agent.
        * false: causes a new Agent with default values to be used.
     * createConnection <Function> A function that produces a socket/stream to use for the request when the agent option is not used. This can be used to avoid creating a custom Agent class just to override the default createConnection function. See agent.createConnection() for more details. Any Duplex stream is a valid return value.
-    * timeout <number>: A number specifying the socket timeout in milliseconds. This will set the timeout before the socket is connected.
-    * setHost <boolean>: Specifies whether or not to automatically add the Host header. Defaults to true.
+    * timeout `<number>` : A number specifying the socket timeout in milliseconds. This will set the timeout before the socket is connected.
+    * setHost `<boolean>`: Specifies whether or not to automatically add the Host header. Defaults to true.
   * callback <Function>
   * Returns: <HTTP2OutgoingMessage>
 
 ### Https/1.1 - request(options[, callback])
- * options <Object> | <string> | <URL> Accepts all options from Http/1.1 , with some differences in default values and aditional tls options:
+ * options `<Object> | <string> | <URL>` Accepts all options from Http/1.1 , with some differences in default values and aditional tls options:
     * protocol Default: 'https:'
     * port Default: 443
     * agent Default: https.globalAgent
-    * rejectUnauthorized <boolean> If not false, the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code. Default: true.
-    * ALPNProtocols: <string[]> | <Buffer[]> | <Uint8Array[]> | <Buffer> | <Uint8Array> An array of strings, Buffers or Uint8Arrays, or a single Buffer or Uint8Array containing the supported ALPN protocols. Buffers should have the format [len][name][len][name]... e.g. 0x05hello0x05world, where the first byte is the length of the next protocol name. Passing an array is usually much simpler, e.g. ['hello', 'world'].
-    * servername: <string> Server name for the SNI (Server Name Indication) TLS extension.
+    * rejectUnauthorized `<boolean>` If not false, the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code. Default: true.
+    * ALPNProtocols: `<string[]> | <Buffer[]> | <Uint8Array[]> | <Buffer> | <Uint8Array>` An array of strings, Buffers or Uint8Arrays, or a single Buffer or Uint8Array containing the supported ALPN protocols. Buffers should have the format [len][name][len][name]... e.g. 0x05hello0x05world, where the first byte is the length of the next protocol name. Passing an array is usually much simpler, e.g. ['hello', 'world'].
+    * servername: `<string>` Server name for the SNI (Server Name Indication) TLS extension.
     * checkServerIdentity(servername, cert) <Function> A callback function to be used (instead of the builtin tls.checkServerIdentity() function) when checking the server's hostname (or the provided servername when explicitly set) against the certificate. This should return an <Error> if verification fails. The method should return undefined if the servername and cert are verified.
-    * session <Buffer> A Buffer instance, containing TLS session.
-    * minDHSize <number> Minimum size of the DH parameter in bits to accept a TLS connection. When a server offers a DH parameter with a size less than minDHSize, the TLS connection is destroyed and an error is thrown. Default: 1024.
+    * session `<Buffer>` A Buffer instance, containing TLS session.
+    * minDHSize `<number>` Minimum size of the DH parameter in bits to accept a TLS connection. When a server offers a DH parameter with a size less than minDHSize, the TLS connection is destroyed and an error is thrown. Default: 1024.
     * secureContext: Optional TLS context object created with tls.createSecureContext(). If a secureContext is not provided, one will be created by passing the entire options object to tls.createSecureContext().
-    * lookup: <Function> Custom lookup function. Default: dns.lookup().
- * callback <Function>
- * Returns: <HTTP2OutgoingMessage>
+    * lookup: `<Function>` Custom lookup function. Default: dns.lookup().
+ * callback `<Function>`
+ * Returns: `<HTTP2OutgoingMessage>`
 
 ### Https/2.0 - request(options[, callback])
- * options <Object> | <string> | <URL> Accepts all options from Https/1.1 and additional http2.0 spicifics :
-    * keepH2ConnectionFor <number> Time to keep http2 connection after used last time. Default: 1000ms.
-    * keepH1IdentificationCacheFor <number> TTL time for identification results of http1.1. Default: 30000ms.
- * callback <Function>
- * Returns: <HTTP2OutgoingMessage>
+ * options `<Object> | <string> | <URL>` Accepts all options from Https/1.1 and additional http2.0 spicifics :
+    * keepH2ConnectionFor `<number>` Time to keep http2 connection after used last time. Default: 1000ms.
+    * keepH1IdentificationCacheFor `<number>` TTL time for identification results of http1.1. Default: 30000ms.
+ * callback `<Function>`
+ * Returns: `<HTTP2OutgoingMessage>`
 
 ## How?
 `http2-client` implements 'Application-Layer Protocol Negotiation (ALPN)'.
