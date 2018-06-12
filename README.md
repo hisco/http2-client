@@ -141,5 +141,5 @@ If non will be defined the node `globalAgent` will be used.
 [npm-url]: https://npmjs.org/package/http2-client
 [travis-image]: https://img.shields.io/travis/hisco/http2-client/master.svg?style=flat-square
 [travis-url]: https://travis-ci.org/hisco/http2-client
-[snyk-image] : https://snyk.io/test/github/hisco/http2-client/badge.svg?targetFile=package.json
-[snyk-url] : https://snyk.io/test/github/hisco/http2-client/badge.svg?targetFile=package.json
+[snyk-image]: https://snyk.io/test/github/hisco/http2-client/badge.svg?targetFile=package.json
+[snyk-url]: https://snyk.io/test/github/hisco/http2-client/badge.svg?targetFile=package.json
