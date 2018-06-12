@@ -1,6 +1,6 @@
 {
   "name": "http2-client",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "An http2 and http1 client compatible, it's using the ALPN protocol",
   "main": "lib/index.js",
   "scripts": {
