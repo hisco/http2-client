@@ -2,7 +2,7 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
-[![Known Vulnerabilities][snyk-image][snyk-url]
+[![Known Vulnerabilities][snyk-image]][snyk-url]
 
 Transparently make http request to both http1 / http2 server.
 
