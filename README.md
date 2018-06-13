@@ -28,7 +28,7 @@ In case of http2.0 all requests use a signle connection (per request manager).
 
 ## Usage - Same interface
 ```js
-const {request} = require('http-client');
+const {request} = require('http2-client');
 const h1Target = 'http://www.example.com/';
 const h2Target = 'https://www.example.com/';
 const req1 = request(h1Target, (res)=>{
