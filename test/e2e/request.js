@@ -1,4 +1,4 @@
-const { HttpRequestManager , request } = require('../../lib/index');
+const { HttpRequestManager , request , get} = require('../../lib/index');
 const {Http2Debug} = require('http2-debug');
 
 const chai = require('chai');
@@ -26,6 +26,8 @@ const onHttpServerReady = new Promise((resolve , reject)=>{
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
+                    path : req.url,
+                    method : req.method,
                     body,
                     headers
                 }));
@@ -56,157 +58,361 @@ const onHTTP2ServerReady = new Promise((resolve , reject)=>{
     });
 })
 
-describe('request' , ()=>{
-    before(()=>{
-        return Promise.all([
-            onHTTP2ServerReady,
-            onHttpServerReady
-        ])
-    })
-    describe('http1' , ()=>{
-        it('Should be able to make request with request options string' , ()=>{
-            return new Promise((resolve , reject)=>{
-                const req = request(HTTP_URL , (res)=>{
-                    getBody(res)
-                    .then((bodyRaw)=>{
-                        const json = JSON.parse(bodyRaw);
-                        resolve()
-                    })
-                    .catch((err)=>{
-                        reject(err)
-                    })
+describe('e2e' , ()=>{
+    describe('request' , ()=>{
+        before(()=>{
+            return Promise.all([
+                onHTTP2ServerReady,
+                onHttpServerReady
+            ])
+        })
+        describe('http1' , ()=>{
+            it('Should be able to make request with request options as a string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request(`${HTTP_URL}/test1` , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options and url as a string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request(`${HTTP_URL}/test1` , { method : 'POST'}, (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('POST');
+                            expect(json.body.test).eq(1);
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.write('{"test":1}')
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options and method lowercase' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request({
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'post'
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('POST');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options and headers' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request({
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'delete',
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(json.headers['test-me']).eq('90');
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('DELETE');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+        })
+        describe('http2' , ()=>{
+            it('Should be able to make request with request options with body' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request({
+                        path : '/test1',
+                        protocol : 'https:',
+                        host : SERVER_HOST,
+                        port : HTTP2_PORT,
+                        method : 'POST',
+                        headers : {
+                            'test-me' : 90
+                        }
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(json.headers['test-me']).eq('90');
+                            expect(res.statusCode).eq(200);
+                            expect(json.headers[':path']).eq('/test1');
+                            expect(json.headers[':method']).eq('POST');
+                            expect(JSON.parse(json.body).test).eq(1);
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.write('{"test":1}');
+                    req.end();
+                })
+            });
+            
+            it('Should be able to make request with request options and url as string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request(HTTP2_URL , {
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        method : 'POST',
+                        protocol : 'https:',
+                        port : HTTP2_PORT,
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(json.headers['test-me']).eq('90');
+                            expect(res.statusCode).eq(200);
+                            expect(json.headers[':path']).eq('/test1');
+                            expect(json.headers[':method']).eq('POST');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
                 });
-                req.end();
-            })
-        });
-        it('Should be able to make request with request options' , ()=>{
-            return new Promise((resolve , reject)=>{
-                const req = request({
-                    path : '/test',
-                    host : SERVER_HOST,
-                    port : HTTP_PORT
-                } , (res)=>{
-                    getBody(res)
-                    .then((bodyRaw)=>{
-                        const json = JSON.parse(bodyRaw);
-                        resolve()
-                    })
-                    .catch((err)=>{
-                        reject(err)
-                    })
+            });
+            it('Should be able to make request with request as string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request(`${HTTP2_URL}/test1`, (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.headers[':path']).eq('/test1');
+                            expect(json.headers[':method']).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
                 });
-                req.end();
-            })
+            });
         });
-        it('Should be able to make request with request options' , ()=>{
-            return new Promise((resolve , reject)=>{
-                const req = request({
-                    path : '/test',
-                    host : SERVER_HOST,
-                    port : HTTP_PORT,
-                    headers : {
-                        'tesT-me' :'90'
-                    }
-                } , (res)=>{
-                    getBody(res)
-                    .then((bodyRaw)=>{
-                        const json = JSON.parse(bodyRaw);
-                        resolve(json)
-                    })
-                    .catch((err)=>{
-                        reject(err)
-                    })
+    });
+    
+    describe('get' , ()=>{
+        before(()=>{
+            return Promise.all([
+                onHTTP2ServerReady,
+                onHttpServerReady
+            ])
+        });
+        describe('http1' , ()=>{
+            it('Should be able to make request with request options as a string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = get(`${HTTP_URL}/test1` , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options and url as a string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = get(`${HTTP_URL}/test1` , { method : 'POST'}, (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options method lowercase' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = get({
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'post'
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                })
+            });
+            it('Should be able to make request with request options and headers' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = get({
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'delete',
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(json.headers['test-me']).eq('90');
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                })
+            });
+        })
+        describe('http2' , ()=>{
+            it('Should be able to make request with request options and headers' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = get({
+                        path : '/test1',
+                        protocol : 'https:',
+                        host : SERVER_HOST,
+                        port : HTTP2_PORT,
+                        method : 'POST',
+                        headers : {
+                            'test-me' : 90
+                        }
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(json.headers['test-me']).eq('90');
+                            expect(res.statusCode).eq(200);
+                            expect(json.headers[':path']).eq('/test1');
+                            expect(json.headers[':method']).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                })
+            });
+            
+            it('Should be able to make request with request options and url as string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = get(HTTP2_URL , {
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        method : 'POST',
+                        protocol : 'https:',
+                        port : HTTP2_PORT,
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(json.headers['test-me']).eq('90');
+                            expect(res.statusCode).eq(200);
+                            expect(json.headers[':path']).eq('/test1');
+                            expect(json.headers[':method']).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
                 });
-                req.end();
-            })
-            .then((json)=>{
-                return expect(json.headers['test-me']).eq('90')
-            })
-        });
-    })
-    describe('http2' , ()=>{
-        it('Should be able to make request with request options' , ()=>{
-            return new Promise((resolve , reject)=>{
-                const req = request({
-                    path : '/test',
-                    protocol : 'https:',
-                    host : SERVER_HOST,
-                    port : HTTP2_PORT
-                } , (res)=>{
-                    getBody(res)
-                    .then((bodyRaw)=>{
-                        const json = JSON.parse(bodyRaw);
-                        resolve()
-                    })
-                    .catch((err)=>{
-                        reject(err)
-                    })
+            });
+            it('Should be able to make request with request as string and body' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = get(`${HTTP2_URL}/test1`, (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.headers[':path']).eq('/test1');
+                            expect(json.headers[':method']).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
                 });
-                req.end();
-            })
+            });
         });
-        it('Should be able to make request with request options' , ()=>{
-            return new Promise((resolve , reject)=>{
-                const req = request({
-                    path : '/test',
-                    host : SERVER_HOST,
-                    protocol : 'https:',
-                    port : HTTP2_PORT,
-                    headers : {
-                        'tesT-me' :'90'
-                    }
-                } , (res)=>{
-                    getBody(res)
-                    .then((bodyRaw)=>{
-                        const json = JSON.parse(bodyRaw);
-                        resolve(json)
-                    })
-                    .catch((err)=>{
-                        reject(err)
-                    })
-                });
-                req.end();
-            })
-            .then((json)=>{
-                return expect(json.headers['test-me']).eq('90')
-            })
-        });
-        it('Should be able to make request with request options' , ()=>{
-            return new Promise((resolve , reject)=>{
-                const req = request({
-                    path : '/test',
-                    host : SERVER_HOST,
-                    method : 'POST',
-                    protocol : 'https:',
-                    port : HTTP2_PORT,
-                    headers : {
-                        'tesT-me' :'90'
-                    }
-                } , (res)=>{
-                    getBody(res)
-                    .then((bodyRaw)=>{
-                        const json = JSON.parse(bodyRaw);
-                        resolve(json)
-                    })
-                    .catch((err)=>{
-                        reject(err)
-                    })
-                });
-                req.write('{"key":')
-                req.end('"value"}');
-            })
-            .then((json)=>{
-                expect(json.headers['test-me']).eq('90') 
-                expect(json.headers[':method']).eq('POST') 
-            })
-        });
-    })
+    });
+    
+
     after(()=>{
         serverCloseActions.forEach((action)=>{
             action();
         })
     })
-});
+})
 
 function getBody(stream){
     return new Promise((resolve , reject)=>{

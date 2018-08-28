@@ -4,7 +4,7 @@
 [![Build Status][travis-image]][travis-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 
-Transparently make http request to both http1 / http2 server.
+Drop-in replacement for Nodes http and https that transparently make http request to both http1 / http2 server.
 
 ## Motivation
 http2 in Node.JS works entirly different, while in browsers the experience is the same.
@@ -27,6 +27,7 @@ In case of http1.1 the connection pool is managed as usual with an http agent.
 In case of http2.0 all requests use a signle connection (per request manager).
 
 ## Usage - Same interface
+###request()
 ```js
 const {request} = require('http2-client');
 const h1Target = 'http://www.example.com/';
@@ -49,8 +50,30 @@ HttpVersion : ${res.httpVersion}
 });
 req2.end();
 ```
+###get()
+```js
+const {get} = require('http2-client');
+const h1Target = 'http://www.example.com/';
+const h2Target = 'https://www.example.com/';
+get(h1Target, (res)=>{
+    console.log(`
+Url : ${h1Target}
+Status : ${res.statusCode}
+HttpVersion : ${res.httpVersion}
+    `);
+});
+
+get(h2Target, (res)=>{
+    console.log(`
+Url : ${h2Target}
+Status : ${res.statusCode}
+HttpVersion : ${res.httpVersion}
+    `);
+});
+```
 
 ## API
+The module mimics the nodejs http module interface of both get() and request().
 Same API as regular http/s modules.
 Different options will be used depending on the destination this method will get.
   * Http/1.1
@@ -75,7 +98,7 @@ const req = httpRequestManager.request(/*....*/);
 req.end();
 ``` 
 
-### Http/1.1 - request(options[, callback])
+### Http/1.1 - request(options[, callback]) | request(url [,options][, callback]) 
  * options `<Object> | <string> | <URL>`
     * protocol `<string>` Protocol to use. Default: 'http:'.
     * host `<string>` A domain name or IP address of the server to issue the request to. Default:  'localhost'.
@@ -98,7 +121,12 @@ req.end();
   * callback <Function>
   * Returns: <HTTP2OutgoingMessage>
 
-### Https/1.1 - request(options[, callback])
+### All http protocols - get(options[, callback]) | get(url [,options][, callback])
+  * Differences are per protocol as described in relevant request() and protocol.
+  * Same interface as request() with the method always set to GET. Properties that are inherited from the prototype are ignored.
+  * Since most requests are GET requests without bodies, Node.js provides this convenience method. The only difference between this method and http.request() is that it sets the method to GET and calls req.end() automatically
+  
+### Https/1.1 - request(options[, callback]) | request(url [,options][, callback])
  * options `<Object> | <string> | <URL>` Accepts all options from Http/1.1 , with some differences in default values and aditional tls options:
     * protocol Default: 'https:'
     * port Default: 443
@@ -114,7 +142,7 @@ req.end();
  * callback `<Function>`
  * Returns: `<HTTP2OutgoingMessage>`
 
-### Https/2.0 - request(options[, callback])
+### Https/2.0 - request(options[, callback]) | request(url [,options][, callback])
  * options `<Object> | <string> | <URL>` Accepts all options from Https/1.1 and additional http2.0 spicifics :
     * keepH2ConnectionFor `<number>` Time to keep http2 connection after used last time. Default: 1000ms.
     * keepH1IdentificationCacheFor `<number>` TTL time for identification results of http1.1. Default: 30000ms.

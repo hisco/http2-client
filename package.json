@@ -1,7 +1,7 @@
 {
   "name": "http2-client",
-  "version": "1.0.9",
-  "description": "An http2 and http1 client compatible, it's using the ALPN protocol",
+  "version": "1.1.0",
+  "description": "Drop-in replacement for Nodes http and https that transparently make http request to both http1 / http2 server, it's using the ALPN protocol",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha --recursive --reporter spec",
