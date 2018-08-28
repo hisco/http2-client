@@ -125,7 +125,7 @@ req.end();
   * Differences are per protocol as described in relevant request() and protocol.
   * Same interface as request() with the method always set to GET. Properties that are inherited from the prototype are ignored.
   * Since most requests are GET requests without bodies, Node.js provides this convenience method. The only difference between this method and http.request() is that it sets the method to GET and calls req.end() automatically
-  
+
 ### Https/1.1 - request(options[, callback]) | request(url [,options][, callback])
  * options `<Object> | <string> | <URL>` Accepts all options from Http/1.1 , with some differences in default values and aditional tls options:
     * protocol Default: 'https:'
