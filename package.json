@@ -1,6 +1,6 @@
 {
   "name": "http2-client",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Drop-in replacement for Nodes http and https that transparently make http request to both http1 / http2 server, it's using the ALPN protocol",
   "main": "lib/index.js",
   "scripts": {
