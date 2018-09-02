@@ -123,8 +123,8 @@ req.end();
     * createConnection <Function> A function that produces a socket/stream to use for the request when the agent option is not used. This can be used to avoid creating a custom Agent class just to override the default createConnection function. See agent.createConnection() for more details. Any Duplex stream is a valid return value.
     * timeout `<number>` : A number specifying the socket timeout in milliseconds. This will set the timeout before the socket is connected.
     * setHost `<boolean>`: Specifies whether or not to automatically add the Host header. Defaults to true.
-  * callback <Function>
-  * Returns: <ClientRequest>
+  * callback `<Function>`
+  * Returns: `<ClientRequest>`
 
 ### All http protocols - get(options[, callback]) | get(url [,options][, callback])
   * Differences are per protocol as described in relevant request() and protocol.
