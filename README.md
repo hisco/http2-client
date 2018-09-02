@@ -73,7 +73,7 @@ HttpVersion : ${res.httpVersion}
 ```
 
 ## API
-The module mimics the nodejs http module interface of both get() and request().
+The module mimics the nodejs http module interface of ClientRequest, get() and request().
 Same API as regular http/s modules.
 Different options will be used depending on the destination this method will get.
   * Http/1.1
@@ -81,8 +81,13 @@ Different options will be used depending on the destination this method will get
   * Http/2.0
 
 ### HttpRequestManager
-By default this module exports a default request method.
-However, you can always create different request manager.
+By default this module exports a default request method the will try to detect the currect protocol to use (http2/http1.1/https1.1).
+However, you can always create different request manager with your specfic defaults and seperated cache.
+* options `<Object>`
+    * keepH2ConnectionFor `<number>` Time to keep http2 connection after used last time. Default: 1000ms.
+    * keepH1IdentificationCacheFor `<number>` TTL time for identification results of http1.1. Default: 30000ms.
+    * useHttp `<boolean>` Should enforce http socket.
+    * useHttps `<boolean>` Should enforce https socket.
 ```js
 //Use the default
 const {request} = require('http2-client');
@@ -119,7 +124,7 @@ req.end();
     * timeout `<number>` : A number specifying the socket timeout in milliseconds. This will set the timeout before the socket is connected.
     * setHost `<boolean>`: Specifies whether or not to automatically add the Host header. Defaults to true.
   * callback <Function>
-  * Returns: <HTTP2OutgoingMessage>
+  * Returns: <ClientRequest>
 
 ### All http protocols - get(options[, callback]) | get(url [,options][, callback])
   * Differences are per protocol as described in relevant request() and protocol.
@@ -140,14 +145,12 @@ req.end();
     * secureContext: Optional TLS context object created with tls.createSecureContext(). If a secureContext is not provided, one will be created by passing the entire options object to tls.createSecureContext().
     * lookup: `<Function>` Custom lookup function. Default: dns.lookup().
  * callback `<Function>`
- * Returns: `<HTTP2OutgoingMessage>`
+ * Returns: `<ClientRequest>`
 
 ### Https/2.0 - request(options[, callback]) | request(url [,options][, callback])
- * options `<Object> | <string> | <URL>` Accepts all options from Https/1.1 and additional http2.0 spicifics :
-    * keepH2ConnectionFor `<number>` Time to keep http2 connection after used last time. Default: 1000ms.
-    * keepH1IdentificationCacheFor `<number>` TTL time for identification results of http1.1. Default: 30000ms.
+ * options `<Object> | <string> | <URL>` Accepts all options from Https/1.1
  * callback `<Function>`
- * Returns: `<HTTP2OutgoingMessage>`
+ * Returns: `<ClientRequest>`
 
 ## How?
 `http2-client` implements 'Application-Layer Protocol Negotiation (ALPN)'.

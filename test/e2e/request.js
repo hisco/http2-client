@@ -1,11 +1,13 @@
-const { HttpRequestManager , request , get} = require('../../lib/index');
+const { HttpRequestManager , request , get , http , https} = require('../../lib/index');
+const requestModule = require('request');
+
 const {Http2Debug} = require('http2-debug');
 
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-spies'));
 
-const http = require('http');
+const httpModule = require('http');
 const SERVER_HOST = '0.0.0.0';
 
 const HTTP_PORT = 8080;
@@ -18,7 +20,7 @@ const serverCloseActions = [];
 
 const onHttpServerReady = new Promise((resolve , reject)=>{
     try{
-        const server = http.createServer((req, res) => {
+        const server = httpModule.createServer((req, res) => {
             getBody(req)
             .then((bodyRaw)=>{
                 const body = JSON.parse(bodyRaw ? bodyRaw : "{}");
@@ -59,6 +61,76 @@ const onHTTP2ServerReady = new Promise((resolve , reject)=>{
 })
 
 describe('e2e' , ()=>{
+    describe('third party validation' ,()=>{
+        let requestWithHttp2Client;
+        before(()=>{
+
+            requestWithHttp2Client = requestModule.defaults({
+                httpModules : {
+                    'http:' : http,
+                    'https:' : https,
+                }
+            });
+        })
+        it('http1 request module should be able to make post request with json body' , async ()=>{
+            return new Promise((resolve,reject)=>{
+                requestWithHttp2Client({
+                    uri : `${HTTP_URL}/test1`,
+                    method : 'post',
+                    json:{
+                        name : 'test1'
+                    },
+                    headers : {
+                        'tesT-me' :'90'
+                    }
+                }, function (error, response, body) {
+                    if (error)
+                        return reject(err);
+                    try{
+                        expect(body.body.name).eq('test1');
+                        expect(body.headers['test-me']).eq('90');
+                        expect(response.statusCode).eq(200);
+                        expect(response.body.method).eq('POST');
+                        resolve();
+                    }
+                    catch(err){
+                        reject(err);
+                    }
+                   
+                });
+            })
+        })
+        it('http2 request module should be able to make post request with json body' , async ()=>{
+            return new Promise((resolve,reject)=>{
+                requestWithHttp2Client({
+                    uri : `${HTTP2_URL}/test1`,
+                    method : 'post',
+                    json:{
+                        name : 'test1'
+                    },
+                    headers : {
+                        'tesT-me' :'90'
+                    }
+                }, function (error, response, respBody) {
+                    if (error)
+                        return reject(error);
+                    try{
+                        const json = JSON.parse(respBody.body);
+                        expect(json.name).eq('test1');
+                        expect(respBody.headers['test-me']).eq('90');
+                        expect(response.statusCode).eq(200);
+                        expect(respBody.headers[':method']).eq('POST');
+                        resolve();
+                    }
+                    catch(err){
+                        reject(err);
+                    }
+                   
+                });
+            })
+        })
+    })
+    
     describe('request' , ()=>{
         before(()=>{
             return Promise.all([
@@ -407,10 +479,13 @@ describe('e2e' , ()=>{
     });
     
 
-    after(()=>{
-        serverCloseActions.forEach((action)=>{
-            action();
-        })
+    after(async ()=>{
+       return new Promise((resolve)=>{
+            serverCloseActions.forEach((action)=>{
+                action();
+            });
+            setTimeout(resolve , 100)
+       })
     })
 })
 
