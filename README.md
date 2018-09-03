@@ -5,6 +5,7 @@
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 
 Drop-in replacement for Nodes http and https that transparently make http request to both http1 / http2 server.
+Currently, it's the only http2 compatible API for client.
 
 ## Motivation
 http2 in Node.JS works entirly different, while in browsers the experience is the same.
