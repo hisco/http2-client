@@ -61,6 +61,12 @@ const onHTTP2ServerReady = new Promise((resolve , reject)=>{
 })
 
 describe('e2e' , ()=>{
+    before(()=>{
+        return Promise.all([
+            onHTTP2ServerReady,
+            onHttpServerReady
+        ])
+    })
     describe('third party validation' ,()=>{
         let requestWithHttp2Client;
         before(()=>{
@@ -132,12 +138,6 @@ describe('e2e' , ()=>{
     })
     
     describe('request' , ()=>{
-        before(()=>{
-            return Promise.all([
-                onHTTP2ServerReady,
-                onHttpServerReady
-            ])
-        })
         describe('http1' , ()=>{
             it('Should be able to make request with request options as a string' , ()=>{
                 return new Promise((resolve , reject)=>{
