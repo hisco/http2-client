@@ -5,7 +5,7 @@
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 
 Drop-in replacement for Nodes http and https that transparently make http request to both http1 / http2 server.
-Currently, it's the only http2 compatible API for client.
+Currently, it's the only http2/https compatible API for clients.
 
 ## Motivation
 http2 in Node.JS works entirly different, while in browsers the experience is the same.
@@ -24,8 +24,13 @@ Transparently supports all http protocol.
   * Https/1.1
   * Http/2.0
 
-In case of http1.1 the connection pool is managed as usual with an http agent.
-In case of http2.0 all requests use a signle connection (per request manager).
+In case of http1.1
+  * Connection pool is managed as usual with an http agent.
+
+In case of http2.0 
+  * Connection pool is managed by Http2 agent.
+  * Requests to the same "origin" will use the same tcp connection (per request manager) - automatically.
+  * All Http2 features are available except push.
 
 ## Usage - Same interface
 ###request()
