@@ -8,11 +8,11 @@ Drop-in replacement for Nodes http and https that transparently make http reques
 Currently, it's the only http2/https compatible API for clients.
 
 ## Motivation
-http2 in Node.JS works entirly different, while in browsers the experience is the same.
+http2 in Node.JS works entirely differently, while in browsers the experience is the same.
 `http2-client` was created to enable http2 / http1.1 requests with the same interface as http1.1.
 
 The reason is that many NPM modules cannot upgrade to use http2.0 as these are coupled into http1.1 interface.
-With `http2-client` it should be very stright forward.
+With `http2-client` it should be very straight forward.
 
 Meaning you don't need to know which protocol the destination supports before making the request `http2-client` will chose the one that works.
 
@@ -33,7 +33,7 @@ In case of http2.0
   * All Http2 features are available except push.
 
 ## Usage - Same interface
-###request()
+### request()
 ```js
 const {request} = require('http2-client');
 const h1Target = 'http://www.example.com/';
@@ -56,7 +56,7 @@ HttpVersion : ${res.httpVersion}
 });
 req2.end();
 ```
-###get()
+### get()
 ```js
 const {get} = require('http2-client');
 const h1Target = 'http://www.example.com/';
@@ -167,7 +167,7 @@ After the http2.0 connection won't be used for `keepH2ConnectionFor` which defau
 
 If the supported protocol is http1.x `http2-client` will only cache the identification result and not the actual socket for `keepH1IdentificationCacheFor` which defaults to 30000 ms.
 Any socket configuration is manged by the http agent.
-If non will be defined the node `globalAgent` will be used. 
+If none is defined the node `globalAgent` will be used. 
 
 
 ## License
