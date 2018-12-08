@@ -1,5 +1,7 @@
 # HTTP2 client
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/hisco/http2-client.svg)](https://greenkeeper.io/)
+
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
