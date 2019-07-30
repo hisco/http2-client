@@ -294,28 +294,6 @@ describe('e2e' , ()=>{
                     req.end();
                 })
             });
-            // it('Should be able to make request with request options with body' , ()=>{
-            //     return new Promise((resolve , reject)=>{
-            //         const req = require('http2')({
-            //             path : '/test1',
-            //             protocol : 'https:',
-            //             host : SERVER_HOST,
-            //             port : HTTP2_PORT,
-            //             method : 'POST',
-            //             headers : {
-            //                 'test-me' : 90
-            //             }
-            //         } , (res)=>{
-                        
-            //         });
-            //         req.end();
-            //         req.setTimeout(1,()=>{
-            //             debugger;
-            //             req.abort()
-            //         })
-            //     })
-            // });
-            
             it('Should be able to make request with request options and url as string' , ()=>{
                 return new Promise((resolve , reject)=>{
                     const req = request(HTTP2_URL , {
