@@ -26,13 +26,20 @@ const onHttpServerReady = new Promise((resolve , reject)=>{
                 const body = JSON.parse(bodyRaw ? bodyRaw : "{}");
                 const headers = req.headers;
 
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
-                    path : req.url,
-                    method : req.method,
-                    body,
-                    headers
-                }));
+                if (req.url.indexOf('delay')!=-1){
+                    setTimeout(respond,100);
+                }
+                else respond();
+                function respond(){
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        path : req.url,
+                        method : req.method,
+                        body,
+                        headers
+                    }));
+                }
+                
             })
             .catch((err)=>{
                 res.status(500).end('')
@@ -227,6 +234,34 @@ describe('e2e' , ()=>{
                     req.end();
                 })
             });
+            it('Should be able to abort immediately' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request({
+                        path : '/delay',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'delete',
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        reject(new Error('Rejected request shouldn\'t respond'))
+                    });
+                    req.on('error' , (err)=>{
+                        try{
+                            expect(err.code).eq('ECONNRESET');
+                            resolve();
+                        }
+                        catch(err){
+                            reject(err);
+                        }
+                    })
+                    req.end();
+                    req.setTimeout(1,()=>{
+                        req.abort()
+                    }) 
+                })
+            });
         })
         describe('http2' , ()=>{
             it('Should be able to make request with request options with body' , ()=>{
@@ -259,6 +294,27 @@ describe('e2e' , ()=>{
                     req.end();
                 })
             });
+            // it('Should be able to make request with request options with body' , ()=>{
+            //     return new Promise((resolve , reject)=>{
+            //         const req = require('http2')({
+            //             path : '/test1',
+            //             protocol : 'https:',
+            //             host : SERVER_HOST,
+            //             port : HTTP2_PORT,
+            //             method : 'POST',
+            //             headers : {
+            //                 'test-me' : 90
+            //             }
+            //         } , (res)=>{
+                        
+            //         });
+            //         req.end();
+            //         req.setTimeout(1,()=>{
+            //             debugger;
+            //             req.abort()
+            //         })
+            //     })
+            // });
             
             it('Should be able to make request with request options and url as string' , ()=>{
                 return new Promise((resolve , reject)=>{
