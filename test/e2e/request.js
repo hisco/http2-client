@@ -58,7 +58,18 @@ const onHttpServerReady = new Promise((resolve , reject)=>{
     }
 });
 const onHTTP2ServerReady = new Promise((resolve , reject)=>{
-    http2Debug = new Http2Debug;
+    class HTTP2StubServer extends Http2Debug{
+        onStream(stream , headers){
+            const args = arguments;
+            if (headers[':path'].indexOf('delay')!=-1){
+                setTimeout(()=> super.onStream.apply(this,args),100 )
+            }
+            else{
+                super.onStream.apply(this,args);
+            }
+        }
+    }
+    http2Debug = new HTTP2StubServer;
     http2Debug.createServer((err)=>{
         if (err)
             return reject(err);
@@ -258,7 +269,13 @@ describe('e2e' , ()=>{
                     })
                     req.end();
                     req.setTimeout(1,()=>{
-                        req.abort()
+                        try{
+                            req.abort();
+                            resolve();
+                        }
+                        catch(err){
+                            reject(err)
+                        }
                     }) 
                 })
             });
@@ -294,6 +311,36 @@ describe('e2e' , ()=>{
                     req.end();
                 })
             });
+
+            it('Should be able to abort immediately' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request({
+                        path : '/delay',
+                        host : SERVER_HOST,
+                        port : HTTP2_PORT,
+                        method : 'delete',
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        reject(new Error('Rejected request shouldn\'t respond'))
+                    });
+                    req.on('error' , (err)=>{
+                        try{
+                            expect(err.code).eq('ECONNRESET');
+                            resolve();
+                        }
+                        catch(err){
+                            reject(err);
+                        }
+                    })
+                    req.end();
+                    req.setTimeout(1,()=>{
+                        req.abort()
+                    }) 
+                })
+            });
+
             it('Should be able to make request with request options and url as string' , ()=>{
                 return new Promise((resolve , reject)=>{
                     const req = request(HTTP2_URL , {
@@ -339,6 +386,161 @@ describe('e2e' , ()=>{
                     });
                     req.end();
                 });
+            });
+        });
+    });
+
+    describe('validate http1 interface as assumed' , ()=>{
+        describe('http1' , ()=>{
+            it('Should be able to make request with request options as a string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = require('http').request(`${HTTP_URL}/test1` , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('GET');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options and url as a string' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = require('http').request(`${HTTP_URL}/test1` , { method : 'POST'}, (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('POST');
+                            expect(json.body.test).eq(1);
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.write('{"test":1}')
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options and method lowercase' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = require('http').request({
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'post'
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('POST');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+            it('Should be able to make request with request options and headers' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = require('http').request({
+                        path : '/test1',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'delete',
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        getBody(res)
+                        .then((bodyRaw)=>{
+                            const json = JSON.parse(bodyRaw);
+                            expect(json.headers['test-me']).eq('90');
+                            expect(res.statusCode).eq(200);
+                            expect(json.path).eq('/test1');
+                            expect(json.method).eq('DELETE');
+                            resolve();
+                        })
+                        .catch((err)=>{
+                            reject(err)
+                        })
+                    });
+                    req.end();
+                })
+            });
+            it('Should be able to abort immediately' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = require('http').request({
+                        path : '/delay',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'delete',
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        reject(new Error('Rejected request shouldn\'t respond'))
+                    });
+                    req.on('error' , (err)=>{
+                        try{
+                            expect(err.code).eq('ECONNRESET');
+                            resolve();
+                        }
+                        catch(err){
+                            reject(err);
+                        }
+                    })
+                    req.end();
+                    req.setTimeout(1,()=>{
+                        req.abort()
+                    }) 
+                })
+            });
+            it('Should emit' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = require('http').request({
+                        path : '/delay',
+                        host : SERVER_HOST,
+                        port : HTTP_PORT,
+                        method : 'delete',
+                        headers : {
+                            'tesT-me' :'90'
+                        }
+                    } , (res)=>{
+                        reject(new Error('Rejected request shouldn\'t respond'))
+                    });
+                    req.on('error' , (err)=>{
+                        try{
+                            expect(err.code).eq('ECONNRESET');
+                            resolve();
+                        }
+                        catch(err){
+                            reject(err);
+                        }
+                    })
+                    req.end();
+                    req.setTimeout(1,()=>{
+                        try{
+                            req.abort();
+                            resolve();
+                        }
+                        catch(err){
+                            reject(err)
+                        }
+                    }) 
+                })
             });
         });
     });
