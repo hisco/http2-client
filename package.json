@@ -9,7 +9,7 @@
     "test-ci": "istanbul cover ./node_modules/mocha/bin/_mocha test/**/*.js --report lcovonly -- -R spec && cat ./coverage/lcov.info"
   },
   "devDependencies": {
-    "mocha": "^5.1.1",
+    "mocha": "^7.1.0",
     "chai": "^4.1.2",
     "chai-spies": "^1.0.0",
     "istanbul": "0.4.5",
