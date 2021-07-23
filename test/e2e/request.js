@@ -279,6 +279,27 @@ describe('e2e' , ()=>{
                     }) 
                 })
             });
+            it('Emits network error on client request' , ()=>{
+                return new Promise((resolve , reject)=>{
+                    const req = request({
+                        path : '/',
+                        host : SERVER_HOST,
+                        port : 54321,
+                        method : 'GET'
+                    });
+                    req.on('error', (err)=>{
+                        try{
+                            expect(err.code).eq('ECONNREFUSED');
+                            resolve();
+                        }
+                        catch(err){
+                            reject(err);
+                        }
+                    });
+                    req.end();
+                    setTimeout(reject, 100);
+                })
+            });
         })
         describe('http2' , ()=>{
             it('Should be able to make request with request options with body' , ()=>{
